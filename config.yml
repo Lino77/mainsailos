@@ -131,7 +131,7 @@
     icon: "https://os.mainsail.xyz/rpi-imager.png"
     devices:
       - "btt_cb1-64bit"
-  - name: armbian-btt_cb2-bookworm
+- name: armbian-btt_cb2-bookworm
   type: armbian
   build_only: True
   img_download_url: "https://github.com/mainsail-crew/armbian-builds/releases/latest/download/armbian-bigtreetech_cb12_bookworm.img.xz
