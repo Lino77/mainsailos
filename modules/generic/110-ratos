@@ -1,0 +1,128 @@
+#!/bin/bash
+set -xe
+export LC_ALL=C
+
+########################################
+# Functions and Basic Configuration    #
+########################################
+
+# Load common functions and set up cleanup trap
+source /common.sh
+install_cleanup_trap
+
+# Load additional configuration (e.g., BASE_USER)
+source /files/00-config
+
+########################################
+# Configuration                        #
+########################################
+
+readonly REPO_RATOS="https://github.com/Rat-OS/RatOS-configurator.git"
+readonly BRANCH_RATOS="v2.1.x-deployment"
+readonly REPO_THEME="https://github.com/Rat-OS/RatOS-theme.git"
+readonly BRANCH_THEME="v2.1.x"
+
+RATOS_DEPS=(git python3-serial python3-opencv)
+
+apt-get install --yes "${DEPS[@]}"
+
+
+pushd "/home/${BASE_USER}/printer_data/config" &> /dev/null || exit 1
+sudo -u "${BASE_USER}" git clone "${REPO_THEME}" -b "${BRANCH_THEME}" .theme
+popd &> /dev/null || exit 1
+pushd "/home/${BASE_USER}" &> /dev/null || exit 1
+sudo -u "${BASE_USER}" git clone "${REPO_RATOS}" -b "${BRANCH_RATOS}" ratos-configurator
+popd &> /dev/null || exit 1
+
+cp /root/etc/avahi/avahi-daemon.conf /etc/avahi/avahi-daemon.conf   
+cp /root/var/log/ratos.log /var/log/ratos.log
+
+
+# Set default git merge strategy
+sudu -u "${BASE_USER}" git config --global pull.ff only
+
+# Create release file
+if [ -f "/etc/ratos_version" ]; then
+    sudo rm -f /etc/ratos_version
+fi
+function get_parent {
+    cat /etc/os-release | grep VERSION_CODENAME | cut -d '=' -f2
+}
+
+echo "${DIST_NAME} v${DIST_VERSION} ($(get_parent))" > "/etc/${DIST_NAME,,}-release"
+
+## Step 3: Install system dependencies
+apt-get update --allow-releaseinfo-change
+# shellcheck disable=SC2086
+check_install_pkgs ${RATOS_DEPS}
+## END Step 3
+
+# Install RatOS Configurator
+sudo -u "${BASE_USER}" bash /home/"${BASE_USER}"/ratos-configurator/app/scripts/setup.sh
+
+
+
+########################################
+# Config Webserver                     #
+########################################
+
+echo "Remove the default site"
+rm /etc/nginx/sites-enabled/default
+
+echo "Copy the nginx configurations"
+cp /files/mainsail-nginx/mainsail /etc/nginx/sites-available/mainsail
+cp /files/mainsail-nginx/common_vars.conf /etc/nginx/conf.d/common_vars.conf
+cp /files/mainsail-nginx/upstreams.conf /etc/nginx/conf.d/upstreams.conf
+
+echo "Enable the site"
+ln -s /etc/nginx/sites-available/mainsail /etc/nginx/sites-enabled/
+
+########################################
+# Modify Logrotate for nginx           #
+########################################
+
+echo "Modify logrotate cycle from 14d to 2d"
+sudo sed -i 's/rotate 14/rotate 2/' /etc/logrotate.d/nginx
+
+create_user_directories
+
+echo "Linking log files"
+ln -s /var/log/nginx/mainsail-access.log /home/"${BASE_USER}"/printer_data/logs/mainsail-access.log
+ln -s /var/log/nginx/mainsail-error.log /home/"${BASE_USER}"/printer_data/logs/mainsail-error.log
+
+########################################
+# Switch to BASE_USER home directory   #
+########################################
+
+pushd /home/"${BASE_USER}" &> /dev/null || exit 1
+
+########################################
+# Download latest release              #
+########################################
+
+echo "Downloading Mainsail"
+sudo -u "${BASE_USER}" wget -q --show-progress -O mainsail.zip "${DOWNLOAD_URL}"
+sudo -u "${BASE_USER}" unzip mainsail.zip -d /home/"${BASE_USER}"/mainsail
+## cleanup
+rm /home/"${BASE_USER}"/mainsail.zip
+
+########################################
+# Fix userrights                       #
+########################################
+
+gpasswd -a www-data "${BASE_USER}"
+chmod g+x /home/"${BASE_USER}"
+
+########################################
+# Setup mainsail.cfg                   #
+########################################
+
+echo "Installing mainsail.cfg"
+sudo -u "${BASE_USER}" git clone ${CONFIG_REPO} mainsail-config
+ln -sf /home/"${BASE_USER}"/mainsail-config/mainsail.cfg /home/"${BASE_USER}"/printer_data/config/mainsail.cfg
+
+########################################
+# Return to last directory             #
+########################################
+
+popd &> /dev/null || exit 1
