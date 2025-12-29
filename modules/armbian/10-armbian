@@ -23,8 +23,6 @@ if_group_exists_run() {
 ########################################
 # Configuration                        #
 ########################################
-BASE_DISTRO="armbian"
-export BASE_DISTRO
 BASE_PASSWORD=armbian
 DEPS=(armbian-config avahi-daemon bash-completion iptables)
 
