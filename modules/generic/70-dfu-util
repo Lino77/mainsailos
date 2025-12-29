@@ -15,7 +15,7 @@ source /files/00-config
 
 pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 echo_green "Installing DFU-util build dependencies"
-apt-get -y install libusb-1.0-0-dev autoconf pandoc
+apt-get -y install libusb-1.0-0-dev autoconf pandoc git
 echo_green "Cloning and building DFU-util"
  # Fallback to GitLab mirror if the official SourceForge is down... which it often is..
 git clone git://git.code.sf.net/p/dfu-util/dfu-util || git clone https://gitlab.com/dfu-util/dfu-util.git
