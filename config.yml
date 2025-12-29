@@ -62,7 +62,8 @@
   #img_download_url: "https://github.com/mainsail-crew/armbian-builds/releases/latest/download/armbian-bigtreetech_cb2_bookworm.img.xz"
   img_download_url: "https://github.com/bigtreetech/CB2/releases/download/V3.0.2/CB2_Debian12_minimal_kernel6.1_20250821.img.xz"
   #img_hash_url: "https://github.com/mainsail-crew/armbian-builds/releases/latest/download/armbian-bigtreetech_cb2_bookworm.img.xz.sha256"
-  img_hash_url: "https://github.com/Lino77/mainsailos/blob/BTT_CB2/CB2_Debian12_minimal_kernel6.1_20250821.img.xz.sha256"
+  img_hash_url: "https://raw.githubusercontent.com/Lino77/mainsailos/BTT_CB2/CB2_Debian12_minimal_kernel6.1_20250821.img.xz.sha256
+"
   env:
     ARCH: arm64
     DISTRO: armbian
