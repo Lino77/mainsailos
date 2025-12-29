@@ -34,8 +34,8 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 sudo -u "${BASE_USER}" git clone "${REPO_RATOS}" -b "${BRANCH_RATOS}" ratos-configurator
 popd &> /dev/null || exit 1
 
-cp /root/etc/avahi/avahi-daemon.conf /etc/avahi/avahi-daemon.conf   
-cp /root/var/log/ratos.log /var/log/ratos.log
+# cp /root/etc/avahi/avahi-daemon.conf /etc/avahi/avahi-daemon.conf   
+cp /files/ratos.log /var/log/ratos.log
 
 
 # Set default git merge strategy
