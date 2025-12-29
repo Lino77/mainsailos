@@ -54,7 +54,7 @@ echo "${DIST_NAME} v${DIST_VERSION} ($(get_parent))" > "/etc/${DIST_NAME,,}-rele
 ## Step 3: Install system dependencies
 apt-get update --allow-releaseinfo-change
 # shellcheck disable=SC2086
-check_install_pkgs ${RATOS_DEPS}
+apt-get install --yes ${RATOS_DEPS}
 ## END Step 3
 
 # Install RatOS Configurator
