@@ -77,7 +77,7 @@ ls -la /usr/local/bin
 sudo -u "${BASE_USER}" /home/"${BASE_USER}"/printer_data/config/RatOS/scripts/ratos-install.sh
 
 # Create variant file
-echo "${BASE_DISTRO}" > /etc/"${BASE_DISTRO}"-variant
+echo "${DISTRO}" > /etc/"${DISTRO}"-variant
 
 # MOTD: RatOS logo
 cat << EOF > /etc/motd
