@@ -44,7 +44,7 @@
   env:
     ARCH: arm64
     DISTRO: armbian
-    IMAGE_ENLARGEROOT: 6500
+    IMAGE_ENLARGEROOT: 9000
     MOUNT_PROC: 1
     MOUNT_SYS: 1
   special_modules:
@@ -64,7 +64,7 @@
   env:
     ARCH: arm64
     DISTRO: armbian
-    IMAGE_ENLARGEROOT: 6500
+    IMAGE_ENLARGEROOT: 9000
     MOUNT_PROC: 1
     MOUNT_SYS: 1
   rpi_json:
