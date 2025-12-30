@@ -17,7 +17,7 @@ source /files/00-config
 # Configuration                        #
 ########################################
 
-readonly REPO_RATOS="https://github.com/Rat-OS/RatOS-configurator.git"
+readonly REPO_RATOS="https://github.com/Lino77/RatOS-configurator.git"
 readonly BRANCH_RATOS="dev-deployment"
 readonly REPO_THEME="https://github.com/Rat-OS/RatOS-theme.git"
 readonly BRANCH_THEME="v2.1.x"
@@ -34,9 +34,8 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 sudo -u "${BASE_USER}" git clone "${REPO_RATOS}" -b "${BRANCH_RATOS}" ratos-configurator
 popd &> /dev/null || exit 1
 
-# cp /root/etc/avahi/avahi-daemon.conf /etc/avahi/avahi-daemon.conf   
-cp /files/ratos.log /var/log/ratos.log
-
+touch /var/log/ratos.log
+touch /var/log/sonar.log
 
 # Set default git merge strategy
 sudo -u "${BASE_USER}" git config --global pull.ff only
