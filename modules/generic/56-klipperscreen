@@ -47,14 +47,6 @@ sudo -u "${BASE_USER}" env \
     "${KS_BUILD_INSTALL_SH}"
 
 ########################################
-# Add config to moonraker.conf         #
-########################################
-
-if [[ -f $MOONRAKER_CONFIG ]]; then
-    cat /files/moonraker_klipperscreen.conf >> "$MOONRAKER_CONFIG"
-fi
-
-########################################
 # Return to last directory             #
 ########################################
 
