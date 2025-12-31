@@ -18,7 +18,7 @@ source /files/00-config
 ########################################
 
 readonly REPO_RATOS="https://github.com/Lino77/RatOS-configurator.git"
-readonly BRANCH_RATOS="dev-deployment"
+readonly BRANCH_RATOS="v2.1.x-deployment"
 readonly REPO_THEME="https://github.com/Rat-OS/RatOS-theme.git"
 readonly BRANCH_THEME="v2.1.x"
 
