@@ -65,21 +65,16 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 echo "Cloning repo ..."
 sudo -u "${BASE_USER}" git clone ${REPO} klipper
 
+echo "reset git"
+pushd "klipper" &> /dev/null || exit 1
+sudo -u "${BASE_USER}" git reset --hard b7233d1197d9a2158676ad39d02b80f787054e20
+popd &> /dev/null || exit 1
+
 ########################################
 # Create printer_data directories      #
 ########################################
 
 create_user_directories
-
-
-echo "reset git"
-pushd "klipper" &> /dev/null || exit 1
-
-git reset --hard b7233d1197d9a2158676ad39d02b80f787054e20
-
-popd &> /dev/null || exit 1
-
-
 
 ########################################
 # Create Virtualenv and install        #
