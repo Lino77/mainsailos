@@ -52,6 +52,9 @@ create_user_directories
 
 echo "Execute installer"
 pushd "moonraker" &> /dev/null || exit 1
+
+git reset --hard 71f9e677b81afcc6b99dd5002f595025c38edc7b
+
 sudo -u "${BASE_USER}" ./scripts/install-moonraker.sh -s -z
 popd &> /dev/null || exit 1
 
