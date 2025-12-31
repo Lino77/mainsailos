@@ -36,7 +36,7 @@ cp /files/hotspot/make_sure_master /usr/bin/make_sure_master
 cp /files/hotspot/autohotspotN /usr/bin/autohotspotN
 cp /files/hotspot/add_masquerade /usr/bin/add_masquerade
 cp /files/hotspot/autohotspot.service /etc/systemd/system/autohotspot.service
-cp /files/hotspot/hostap.conf /etc/hostapd/hostapd.conf
+cp /files/hotspot/hostapd.conf /etc/hostapd/hostapd.conf
 cp /files/hotspot/prefix_delegation /etc/dhcp/dhclient-exit-hooks.d/prefix_delegation
 
 # Set hotspot name and password
