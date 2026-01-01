@@ -70,7 +70,7 @@
     MOUNT_PROC: 1
     MOUNT_SYS: 1
   special_modules:
-    - 84-hotspot
+    - 20-cb2-enable-dsi
   rpi_json:
     name: "RatOS $VERSION$ - BigTreeTech CB2 (64-bit)"
     description: "A port of Armbian with preinstalled Klipper/Moonraker/Mainsail for 3D printers"
