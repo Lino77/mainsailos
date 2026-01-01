@@ -17,7 +17,7 @@ source /files/00-config
 # Configuration                        #
 ########################################
 
-readonly REPO_RATOS="https://github.com/Lino77/RatOS-configurator.git"
+readonly REPO_RATOS="https://github.com/Rat-OS/RatOS-configurator.git"
 readonly BRANCH_RATOS="v2.1.x-deployment"
 readonly REPO_THEME="https://github.com/Rat-OS/RatOS-theme.git"
 readonly BRANCH_THEME="v2.1.x"
@@ -33,6 +33,14 @@ popd &> /dev/null || exit 1
 pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 sudo -u "${BASE_USER}" git clone "${REPO_RATOS}" -b "${BRANCH_RATOS}" ratos-configurator
 popd &> /dev/null || exit 1
+
+sed -i 's/\$sudo rm  "\$target"/$sudo rm -f "$target"/' ratos-configurator/app/scripts/common.sh
+
+sed -i '/^SCRIPT_DIR=/a CFG_DIR=$(realpath "$SCRIPT_DIR/..")\n' ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$SCRIPT_DIR"/templates/initial-printer.template.cfg|"\$CFG_DIR"/templates/initial-printer.template.cfg|' ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$SCRIPT_DIR"/boards/\*/\*.rules|"\$CFG_DIR"/boards/\*/\*.rules|' ratos-configurator/configuration/scripts/ratos-install.sh
+
+
 
 touch /var/log/ratos.log
 touch /var/log/sonar.log
