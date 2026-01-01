@@ -20,4 +20,4 @@ export ARMBIAN_SYSTEM_CFG_FILE="$BOOT_PATH/system.cfg"
 ########################################
 
 sed -i 's/^overlays=hdmi$/overlays=dsi/' "${ARMBIAN_CONFIG_TXT_FILE}"
-sed -i 's/^#ks_src='HDMI-1'$/ks_src='DSI-1'/' "${ARMBIAN_SYSTEM_CFG_FILE}"
+sed -i "s/^#ks_src='HDMI-1'$/ks_src='DSI-1'/" "${ARMBIAN_SYSTEM_CFG_FILE}"
