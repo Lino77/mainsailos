@@ -7,8 +7,7 @@
     IMAGE_ENLARGEROOT: 8000
     MOUNT_PROC: 1
     MOUNT_SYS: 1
-  special_modules:
-    - 84-hotspot
+  special_modules: []
   rpi_json:
     name: "RatOS $VERSION$ - Raspberry Pi (32-bit)"
     description: "A port of Raspberry Pi OS with preinstalled Klipper/Moonraker/Mainsail for 3D printers"
@@ -27,8 +26,7 @@
     IMAGE_ENLARGEROOT: 9000
     MOUNT_PROC: 1
     MOUNT_SYS: 1
-  special_modules:
-    - 84-hotspot
+  special_modules: []
   rpi_json:
     name: "RatOS $VERSION$ - Raspberry Pi (64-bit)"
     description: "A port of Raspberry Pi OS with preinstalled Klipper/Moonraker/Mainsail for 3D printers"
@@ -50,7 +48,6 @@
     MOUNT_PROC: 1
     MOUNT_SYS: 1
   special_modules:
-    - 84-hotspot
     - 20-opi-zero3
   rpi_json:
     name: "RatOS $VERSION$ - Orange Pi Zero3 (64-bit)"
@@ -69,8 +66,7 @@
     IMAGE_ENLARGEROOT: 9000
     MOUNT_PROC: 1
     MOUNT_SYS: 1
-  special_modules:
-    - 84-hotspot
+  special_modules: []
   rpi_json:
     name: "RatOS $VERSION$ - BigTreeTech CB2 (64-bit)"
     description: "A port of Armbian with preinstalled Klipper/Moonraker/Mainsail for 3D printers"
