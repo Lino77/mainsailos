@@ -34,11 +34,11 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 sudo -u "${BASE_USER}" git clone "${REPO_RATOS}" -b "${BRANCH_RATOS}" ratos-configurator
 popd &> /dev/null || exit 1
 
-sed -i 's/\$sudo rm  "\$target"/$sudo rm -f "$target"/' ratos-configurator/app/scripts/common.sh
+sed -i 's/\$sudo rm  "\$target"/$sudo rm -f "$target"/' /home/"${BASE_USER}"/ratos-configurator/app/scripts/common.sh
 
-sed -i '/^SCRIPT_DIR=/a CFG_DIR=$(realpath "$SCRIPT_DIR/..")\n' ratos-configurator/configuration/scripts/ratos-install.sh
-sed -i 's|"\$SCRIPT_DIR"/templates/initial-printer.template.cfg|"\$CFG_DIR"/templates/initial-printer.template.cfg|' ratos-configurator/configuration/scripts/ratos-install.sh
-sed -i 's|"\$SCRIPT_DIR"/boards/\*/\*.rules|"\$CFG_DIR"/boards/\*/\*.rules|' ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i '/^SCRIPT_DIR=/a CFG_DIR=$(realpath "$SCRIPT_DIR/..")\n' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$SCRIPT_DIR"/templates/initial-printer.template.cfg|"\$CFG_DIR"/templates/initial-printer.template.cfg|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$SCRIPT_DIR"/boards/\*/\*.rules|"\$CFG_DIR"/boards/\*/\*.rules|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
 
 
 
