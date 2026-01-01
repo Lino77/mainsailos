@@ -13,10 +13,13 @@ export HOLD_PKGS=(
     "raspi-firmware"
     "rpi-eeprom"
 )
+
 get_version() {
-    local ver
-    ver="$(realpath "$( dirname -- "${BASH_SOURCE[0]}")"/VERSION)"
-    cat "${ver}"
+    if [[ -f /VERSION ]]; then
+        cat /VERSION
+    else
+        echo "unknown"
+    fi
 }
 
 export BASE_USER=pi
