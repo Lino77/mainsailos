@@ -55,8 +55,9 @@
     icon: "https://os.mainsail.xyz/rpi-imager.png"
     devices:
       - "opizero3-64bit"
+
       
-- name: armbian-rock_pi_4se_bookworm
+- name: armbian-rock_pi_4-bookworm
   type: armbian
   img_download_url: "https://github.com/mainsail-crew/armbian-builds/releases/latest/download/armbian-rock_pi_4se_bookworm.img.xz"
   img_hash_url: "https://github.com/mainsail-crew/armbian-builds/releases/latest/download/armbian-rock_pi_4se_bookworm.img.xz.sha256"
@@ -67,7 +68,7 @@
     MOUNT_PROC: 1
     MOUNT_SYS: 1
   special_modules: []
-    rpi_json:
+  rpi_json:
     name: "RatOS $VERSION$ - Rockpi4 (64-bit)"
     description: "A port of Armbian with preinstalled Klipper/Moonraker/Mainsail for 3D printers"
     icon: "https://os.mainsail.xyz/rpi-imager.png"
