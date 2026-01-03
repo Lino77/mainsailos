@@ -13,6 +13,10 @@ install_cleanup_trap
 # Load additional configuration (e.g., BASE_USER)
 source /files/00-config
 
+sed -i 's/\$sudo rm -f "\$target"/$sudo rm "\$target"/' /home/"${BASE_USER}"/ratos-configurator/app/scripts/common.sh
+sed -i '/^CFG_DIR=$(realpath "\$SCRIPT_DIR\/\.\.")/d' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$CFG_DIR"/templates/initial-printer.template.cfg|"\$SCRIPT_DIR"/templates/initial-printer.template.cfg|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$CFG_DIR"/boards/\*/\*.rules|"\$SCRIPT_DIR"/boards/\*/\*.rules|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
 
 sudo -u "${BASE_USER}" /home/"${BASE_USER}"/printer_data/config/RatOS/scripts/ratos-post-install.sh
 
