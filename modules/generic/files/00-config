@@ -14,9 +14,8 @@ export HOLD_PKGS=(
     "rpi-eeprom"
 )
 get_version() {
-    local ver
-    ver="$(realpath "$( dirname -- "${BASH_SOURCE[0]}")"/VERSION)"
-    cat "${ver}"
+    [[ -r /VERSION ]] || return 1
+    < /VERSION
 }
 
 export BASE_USER=pi
