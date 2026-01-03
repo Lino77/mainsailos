@@ -13,14 +13,10 @@ export HOLD_PKGS=(
     "raspi-firmware"
     "rpi-eeprom"
 )
-get_version() {
-    [[ -r /VERSION ]] || return 1
-    < /VERSION
-}
 
 export BASE_USER=pi
 export DIST_NAME=RatOS
-export DIST_VERSION="$(get_version)"
+export DIST_VERSION="${RELEASE_TAG}"
 
 export PRINTER_DATA_DIRS="printer_data printer_data/config printer_data/comms printer_data/logs printer_data/systemd"
 export MOONRAKER_CONFIG="/home/${BASE_USER}/printer_data/config/moonraker.conf"
