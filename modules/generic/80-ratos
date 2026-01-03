@@ -17,7 +17,7 @@ source /files/00-config
 # Configuration                        #
 ########################################
 
-readonly REPO_RATOS="https://github.com/Lino77/RatOS-configurator.git"
+readonly REPO_RATOS="https://github.com/RatOS/RatOS-configurator.git"
 readonly BRANCH_RATOS="v2.1.x-deployment"
 readonly REPO_THEME="https://github.com/Rat-OS/RatOS-theme.git"
 readonly BRANCH_THEME="v2.1.x"
@@ -48,7 +48,7 @@ function get_parent {
     cat /etc/os-release | grep VERSION_CODENAME | cut -d '=' -f2
 }
 
-echo "${DIST_NAME} v${RELEASE_TAG} ${DIST_VERSION} ($(get_parent))" > /etc/"${DIST_NAME,,}"-release
+echo "${DIST_NAME} v${DIST_VERSION} ($(get_parent))" > /etc/"${DIST_NAME,,}"-release
 
 ## Step 3: Install system dependencies
 apt-get update --allow-releaseinfo-change
@@ -57,6 +57,11 @@ apt-get install --yes ${RATOS_DEPS}
 ## END Step 3
 
 # Install RatOS Configurator
+sed -i 's/\$sudo rm "\$target"/$sudo rm -f "$target"/' /home/"${BASE_USER}"/ratos-configurator/app/scripts/common.sh
+sed -i '/^SCRIPT_DIR=/a CFG_DIR=$(realpath "$SCRIPT_DIR/..")\n' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$SCRIPT_DIR"/templates/initial-printer.template.cfg|"\$CFG_DIR"/templates/initial-printer.template.cfg|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$SCRIPT_DIR"/boards/\*/\*.rules|"\$CFG_DIR"/boards/\*/\*.rules|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+
 sudo -u "${BASE_USER}" bash /home/"${BASE_USER}"/ratos-configurator/app/scripts/setup.sh
 
 # Start the configurator so extensions can access the API
@@ -71,6 +76,11 @@ popd
 echo "RATOS CLI SANITY CHECKS"
 echo $PATH
 ls -la /usr/local/bin
+
+sed -i 's/\$sudo rm -f "\$target"/$sudo rm "\$target"/' /home/"${BASE_USER}"/ratos-configurator/app/scripts/common.sh
+sed -i '/^CFG_DIR=$(realpath "\$SCRIPT_DIR\/\.\.")/d' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$CFG_DIR"/templates/initial-printer.template.cfg|"\$SCRIPT_DIR"/templates/initial-printer.template.cfg|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+sed -i 's|"\$CFG_DIR"/boards/\*/\*.rules|"\$SCRIPT_DIR"/boards/\*/\*.rules|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
 
 # Install RatOS Configuration
 sudo -u "${BASE_USER}" /home/"${BASE_USER}"/printer_data/config/RatOS/scripts/ratos-install.sh
