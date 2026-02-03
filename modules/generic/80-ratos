@@ -57,6 +57,8 @@ apt-get install --yes ${RATOS_DEPS}
 ## END Step 3
 
 # Install RatOS Configurator
+sed -i 's/libopenblas-base/libopenblas0/g' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-common.sh
+
 #sed -i 's/\$sudo rm "\$target"/$sudo rm -f "$target"/' /home/"${BASE_USER}"/ratos-configurator/app/scripts/common.sh
 #sed -i '/^SCRIPT_DIR=/a CFG_DIR=$(realpath "$SCRIPT_DIR/..")\n' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
 #sed -i 's|"\$SCRIPT_DIR"/templates/initial-printer.template.cfg|"\$CFG_DIR"/templates/initial-printer.template.cfg|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
