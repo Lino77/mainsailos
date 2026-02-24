@@ -21,6 +21,7 @@ SRC_DIR="/home/${BASE_USER}/klipper"
 ENV_DIR="/home/${BASE_USER}/klippy-env"
 
 REPO="https://github.com/Klipper3d/klipper.git"
+BRANCH="ratos/v2.1.x"
 
 DEPS=(git \
       # Packages for python cffi
@@ -63,12 +64,12 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 ########################################
 
 echo "Cloning repo ..."
-sudo -u "${BASE_USER}" git clone ${REPO} klipper
+sudo -u "${BASE_USER}" git clone -b ${BRANCH} ${REPO} klipper
 
-echo "reset git"
-pushd "klipper" &> /dev/null || exit 1
-sudo -u "${BASE_USER}" git reset --hard b7233d1197d9a2158676ad39d02b80f787054e20
-popd &> /dev/null || exit 1
+#echo "reset git"
+#pushd "klipper" &> /dev/null || exit 1
+#sudo -u "${BASE_USER}" git reset --hard b7233d1197d9a2158676ad39d02b80f787054e20
+#popd &> /dev/null || exit 1
 
 ########################################
 # Create printer_data directories      #
