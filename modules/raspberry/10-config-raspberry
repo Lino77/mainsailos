@@ -31,7 +31,7 @@ apt-get install --yes "${DEPS[@]}"
 ########################################
 
 cat /files/boot-config.txt >> "$BOOT_PATH"/config.txt
-
+cp /files/dt-blob.bin "$BOOT_PATH"/
 ########################################
 # Disable serial console to enable     #
 # Hardware Serial (PL011).             #
