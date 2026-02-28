@@ -65,6 +65,12 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 
 echo "Cloning repo ..."
 sudo -u "${BASE_USER}" git clone -b ${BRANCH} ${REPO} klipper
+pushd "klipper" &> /dev/null || exit 1
+sudo -u "${BASE_USER}" git remote rename origin ratos-fork
+sudo -u "${BASE_USER}" git remote add origin https://github.com/Klipper3d/klipper.git
+sudo -u "${BASE_USER}" git fetch origin
+sudo -u "${BASE_USER}" git branch --set-upstream-to=ratos-fork/ratos/v2.1.x ratos/v2.1.x
+popd &> /dev/null || exit 1
 
 #echo "reset git"
 #pushd "klipper" &> /dev/null || exit 1
