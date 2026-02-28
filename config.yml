@@ -1,19 +1,18 @@
-- name: raspberry_pi-arm64-bookworm
-  type: raspberry
-  img_download_url: "https://downloads.raspberrypi.com/raspios_oldstable_lite_arm64/images/raspios_oldstable_lite_arm64-2025-10-02/2025-10-01-raspios-bookworm-arm64-lite.img.xz.torrent"
-  img_hash_url: "https://downloads.raspberrypi.com/raspios_oldstable_lite_arm64/images/raspios_oldstable_lite_arm64-2025-10-02/2025-10-01-raspios-bookworm-arm64-lite.img.xz.sha256"
+- name: armbian-btt_cb2-bookworm
+  type: armbian
+  img_download_url: "https://github.com/Lino77/armbian-builds/releases/latest/download/armbian-bigtreetech_cb2_bookworm.img.xz"
+  img_hash_url: "https://github.com/Lino77/armbian-builds/releases/latest/download/armbian-bigtreetech_cb2_bookworm.img.xz.sha256"
   env:
     ARCH: arm64
+    DISTRO: armbian
     IMAGE_ENLARGEROOT: 9000
     MOUNT_PROC: 1
     MOUNT_SYS: 1
-  special_modules: []
+  special_modules:
+    #- 20-cb2-enable-dsi
   rpi_json:
-    name: "RatOS $VERSION$ - Raspberry Pi (64-bit)"
-    description: "A port of Raspberry Pi OS with preinstalled Klipper/Moonraker/Mainsail for 3D printers"
+    name: "RatOS $VERSION$ - BigTreeTech CB2 (64-bit)"
+    description: "A port of Armbian with preinstalled Klipper/Moonraker/Mainsail for 3D printers"
     icon: "https://os.mainsail.xyz/rpi-imager.png"
-    init_format: "systemd"
     devices:
-      - "pi3-64bit"
-      - "pi4-64bit"
-      - "pi5-64bit"
+      - "btt_cb2-64bit"
