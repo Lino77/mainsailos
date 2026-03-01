@@ -57,7 +57,7 @@ apt-get install --yes ${RATOS_DEPS}
 ## END Step 3
 
 # Install RatOS Configurator
-sed -i 's/libopenblas-base/libopenblas0/g' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-common.sh
+#sed -i 's/libopenblas-base/libopenblas0/g' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-common.sh
 #sed -i 's/PKGLIST="\(.*\)libopenblas-base"/PKGLIST="\1libopenblas0 pygam"/g' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-common.sh
 
 echo "Installing Pygam in Virtualenv"
