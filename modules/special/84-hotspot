@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 set -xe
 export LC_ALL=C
 
@@ -18,13 +18,12 @@ source /files/00-config
 SSID=${WIFI_SSID_AP:-"RatOS"}
 PASS=${WIFI_PASSWORD_AP:-"raspberry"}
 COUNTRY=${WIFI_COUNTRY:-"DE"}
-IP_ADDR="192.168.50.1"
 
-# --- 2. Installation der benötigten Pakete ---
-# Im Build-Prozess von MainsailOS geschieht dies meist über 'install_packages'
-apt-get update && apt-get install -y hostapd dnsmasq iw
+# --- 2. Installation ---
+# Haveged hinzugefügt für schnellere Zufallszahlen (wichtig für hostapd Start)
+apt-get update && apt-get install -y hostapd dnsmasq iw haveged
 
-# --- 3. Hostapd Konfiguration (Zugangspunkt) ---
+# --- 3. Hostapd Konfiguration ---
 cat <<EOF > /etc/hostapd/hostapd.conf
 interface=wlan0
 driver=nl80211
@@ -43,10 +42,9 @@ rsn_pairwise=CCMP
 country_code=${COUNTRY}
 EOF
 
-# Pfad in Standard-Config hinterlegen
 sed -i 's|#DAEMON_CONF=""|DAEMON_CONF="/etc/hostapd/hostapd.conf"|' /etc/default/hostapd
 
-# --- 4. Dnsmasq Konfiguration (DHCP/DNS) ---
+# --- 4. Dnsmasq Konfiguration (DHCP Fix) ---
 cat <<EOF > /etc/dnsmasq.conf
 interface=wlan0
 bind-dynamic
@@ -55,48 +53,70 @@ bogus-priv
 dhcp-range=192.168.50.10,192.168.50.50,12h
 EOF
 
-# --- 5. Das AutoHotspot Switch-Skript (Kernlogik) ---
-# Ersetzt die interaktiven Menüs durch eine Boot-Entscheidung
+# --- 5. Das AutoHotspot Switch-Skript (NetworkManager Edition) ---
 cat <<'EOF' > /usr/bin/autohotspot
 #!/bin/bash
-# Logic to switch between Client and AP mode
-IFACE="wlan0"
+WLAN_IFACE="wlan0"
+ETH_IFACE="eth0"
 
-# Stoppe laufende AP-Dienste für den Scan
-systemctl stop hostapd dnsmasq
-ip link set $IFACE down
-ip addr flush dev $IFACE
-ip link set $IFACE up
+# Warte auf Initialisierung
+sleep 5
 
-# Warte kurz auf Initialisierung
+echo "Prüfe Netzwerkstatus..."
+
+# A. CHECK ETHERNET
+if [ -d /sys/class/net/$ETH_IFACE ] && [ "$(cat /sys/class/net/$ETH_IFACE/carrier 2>/dev/null)" = "1" ]; then
+    echo "Ethernet aktiv. Beende."
+    exit 0
+fi
+
+# B. CHECK WLAN CLIENT (NetworkManager Check)
+WLAN_STATE=$(nmcli -t -f DEVICE,STATE dev | grep "^$WLAN_IFACE:connected" || true)
+if [ -n "$WLAN_STATE" ]; then
+    echo "WLAN bereits verbunden. Beende."
+    exit 0
+fi
+
+# C. START HOTSPOT
+echo "Kein Netzwerk gefunden. Starte Hotspot..."
+
+# NM für wlan0 deaktivieren & RF-Kill lösen
+nmcli dev set $WLAN_IFACE managed no
+rfkill unblock wifi
+
+# Dienste vorbereiten (Unmask falls im Build-Prozess maskiert)
+systemctl unmask dnsmasq hostapd >/dev/null 2>&1
+systemctl stop dnsmasq hostapd 2>/dev/null
+
+# Interface IP setzen (Zwingend für DHCP/dnsmasq)
+ip link set $WLAN_IFACE down
+ip addr flush dev $WLAN_IFACE
+ip addr add 192.168.50.1/24 brd + dev $WLAN_IFACE
+ip link set $WLAN_IFACE up
 sleep 2
 
-# Scan nach SSIDs, die in /etc/wpa_supplicant/wpa_supplicant.conf hinterlegt sind
-# Wir suchen nach Übereinstimmungen zwischen Scan und Config
-WPA_CONF="/etc/wpa_supplicant/wpa_supplicant.conf"
-FOUND_SSID=$(iw dev $IFACE scan | grep SSID | awk -F': ' '{print $2}' | xargs -I {} grep -q 'ssid="{}"' $WPA_CONF && echo "YES" || true)
+# DHCP Server starten
+rm -f /var/lib/misc/dnsmasq.leases
+systemctl restart dnsmasq
 
-if [[ "$FOUND_SSID" == *"YES"* ]]; then
-    echo "Known WiFi found. Connecting as client..."
-    # Standard-Netzwerkdienst übernimmt (z.B. dhcpcd oder NetworkManager)
-else
-    echo "No known WiFi found. Starting Hotspot..."
-    ip addr add 192.168.50.1/24 brd + dev $IFACE
-    systemctl start dnsmasq
-    systemctl start hostapd
+# WLAN Hotspot starten
+if ! systemctl restart hostapd; then
+    # Fallback falls systemd klemmt
+    /usr/sbin/hostapd -B /etc/hostapd/hostapd.conf
 fi
+
+echo "Hotspot aktiv auf 192.168.50.1"
 EOF
 
 chmod +x /usr/bin/autohotspot
 
 # --- 6. Systemd Service Integration ---
-# Damit das Skript bei jedem Boot die Lage prüft
 cat <<EOF > /etc/systemd/system/autohotspot.service
 [Unit]
-Description=AutoHotspot Check for MainsailOS
-After=network-pre.target
-Before=network.target
-Wants=network.target
+Description=AutoHotspot Check for RatOS
+# Wichtig: Nach NetworkManager starten, damit nmcli funktioniert
+After=NetworkManager.service NetworkManager-wait-online.service
+Wants=NetworkManager.service
 
 [Service]
 Type=oneshot
@@ -108,7 +128,8 @@ WantedBy=multi-user.target
 EOF
 
 # Dienste für den ersten Start vorbereiten
-systemctl mask hostapd dnsmasq # Verhindert den automatischen Start ohne Skript-Prüfung
+# Wir maskieren sie hier, damit nur das Skript sie starten darf
+systemctl mask hostapd dnsmasq
 systemctl enable autohotspot.service
 
 echo "Module 84-autohotspot integrated successfully."
