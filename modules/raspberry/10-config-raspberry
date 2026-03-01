@@ -32,6 +32,13 @@ apt-get install --yes "${DEPS[@]}"
 
 cat /files/boot-config.txt >> "$BOOT_PATH"/config.txt
 cp /files/dt-blob.bin "$BOOT_PATH"/
+touch "${BOOT_PATH}/ssh"
+
+USERPI_DATA='pi:$6$c70VpvPsVNCG0YR5$l5vWWLsLko9Kj65gcQ8qvMkuOoRkEagI90qi3F/Y7rm8eNYZHW8CY6BOIKwMH7a3YYzZYL90zf304cAHLFaZE0'
+
+# Datei schreiben
+echo "$USERPI_DATA" > "$BOOT_PATH/userconf.txt"
+
 ########################################
 # Disable serial console to enable     #
 # Hardware Serial (PL011).             #
