@@ -15,6 +15,7 @@ export HOLD_PKGS=(
 )
 
 export BASE_USER=pi
+export BASE_PASSWORD=raspberry
 export DIST_NAME=RatOS
 export DIST_VERSION="${RELEASE_TAG}"
 
