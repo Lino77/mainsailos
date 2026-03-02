@@ -1,15 +1,16 @@
 - name: armbian-btt_cb1-bookworm
   type: armbian
-  img_download_url: "https://github.com/bigtreetech/CB1/releases/download/V3.0.0/CB1_Debian12_minimal_kernel6.6_20241219.img.xz"
-  img_hash_url: "https://raw.githubusercontent.com/Lino77/mainsailos/BTT_CB2/CB1_Debian12_minimal_kernel6.6_20241219.img.xz.sha256"
+  img_download_url: "https://github.com/mainsail-crew/armbian-builds/releases/latest/download/armbian-bigtreetech_cb1_bookworm.img.xz"
+  img_hash_url: "https://github.com/mainsail-crew/armbian-builds/releases/latest/download/armbian-bigtreetech_cb1_bookworm.img.xz.sha256"
+  #img_download_url: "https://github.com/bigtreetech/CB1/releases/download/V3.0.0/CB1_Debian12_minimal_kernel6.6_20241219.img.xz"
+  #img_hash_url: "https://raw.githubusercontent.com/Lino77/mainsailos/BTT_CB2/CB1_Debian12_minimal_kernel6.6_20241219.img.xz.sha256"
   env:
     ARCH: arm64
     DISTRO: armbian
-    IMAGE_ENLARGEROOT: 9000
+    IMAGE_ENLARGEROOT: 6000
     MOUNT_PROC: 1
     MOUNT_SYS: 1
   special_modules:
-    - 20-cb2-enable-dsi
     - 84-hotspot
   rpi_json:
     name: "RatOS $VERSION$ - BigTreeTech CB1 (64-bit)"
