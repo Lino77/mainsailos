@@ -21,7 +21,7 @@ SWAP_CONF_FILE="/etc/dphys-swapfile"
 SWAP_SIZE="256"
 SWAP_MAX="1024"
 
-DEPS=(i2c-tools cpufrequtils)
+DEPS=(i2c-tools)
 
 apt-get install --yes "${DEPS[@]}"
 
@@ -84,16 +84,17 @@ if [[ -f "${PICONFIG_SWAP_CONF_FILE}" ]]; then
 fi
 
 ########################################
-# CPU Performance Mode for RatOS       #
+# CPU Performance Mode (Debian Trixie) #
 ########################################
-CPU_CONF="/etc/default/cpufrequtils"
-if [[ -f "${CPU_CONF}" ]]; then
-    sed -i 's/ENABLE=false/ENABLE=true/' "${CPU_CONF}"
-    sed -i 's/GOVERNOR=.*/GOVERNOR=performance/' "${CPU_CONF}"
-    systemctl_if_exists restart cpufrequtils
-else
-    # Falls cpufrequtils nicht da ist, versuchen wir es direkt via sysfs (Fallback)
+# Wir setzen den Governor direkt über das System-Interface (sysfs)
+if [ -d /sys/devices/system/cpu/cpufreq ]; then
+    echo "Setting CPU governor to performance..."
+    # Sofort für alle Kerne setzen
     echo "performance" | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor || true
+    
+    # Damit es nach dem Booten erhalten bleibt, nutzen wir eine udev-Regel
+    # (Der sauberste Weg unter Debian Trixie ohne cpufrequtils)
+    echo 'ACTION=="add", SUBSYSTEM=="module", KERNEL=="cpufreq_performance", RUN+="/bin/sh -c \"echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\""' > /etc/udev/rules.d/10-cpu-performance.rules
 fi
 
 ########################################
