@@ -92,7 +92,6 @@ if [[ -f "${CPU_CONF}" ]]; then
     # Aktiviert den Dienst und setzt Governor auf performance
     sed -i 's/ENABLE=.*/ENABLE=true/' "${CPU_CONF}"
     sed -i 's/GOVERNOR=.*/GOVERNOR=performance/' "${CPU_CONF}"
-    systemctl restart cpufrequtils || true
 fi
 
 # Fallback/Zusatz: Sofortige Aktivierung für alle Kerne (sysfs)
