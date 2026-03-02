@@ -2,28 +2,27 @@
 set -xe
 export LC_ALL=C
 
-########################################
-# Functions and Basic Configuration    #
-########################################
-
-# Load common functions and set up cleanup trap
 source /common.sh
 install_cleanup_trap
-
-# Load additional configuration (e.g., BASE_USER)
 source /files/00-config
 
-# --- 1. Variablen aus der Build-Umgebung oder Default ---
-# Diese können in der config-Datei des Build-Systems überschrieben werden
 SSID=${WIFI_SSID_AP:-"RatOS"}
 PASS=${WIFI_PASSWORD_AP:-"raspberry"}
 COUNTRY=${WIFI_COUNTRY:-"DE"}
 
-# --- 2. Installation ---
-# Haveged hinzugefügt für schnellere Zufallszahlen (wichtig für hostapd Start)
+# --- 1. Installation & DNS Fix (Bookworm Port 53) ---
 apt-get update && apt-get install -y hostapd dnsmasq iw haveged
 
-# --- 3. Hostapd Konfiguration ---
+# Disable systemd-resolved stub listener to free up port 53 for dnsmasq
+mkdir -p /etc/systemd/resolved.conf.d
+cat <<EOF > /etc/systemd/resolved.conf.d/no-stub.conf
+[Resolve]
+DNSStubListener=no
+EOF
+# We don't restart here to avoid build-environment issues, 
+# it will be active after the first real boot.
+
+# --- 2. Hostapd & Dnsmasq Config ---
 cat <<EOF > /etc/hostapd/hostapd.conf
 interface=wlan0
 driver=nl80211
@@ -44,7 +43,6 @@ EOF
 
 sed -i 's|#DAEMON_CONF=""|DAEMON_CONF="/etc/hostapd/hostapd.conf"|' /etc/default/hostapd
 
-# --- 4. Dnsmasq Konfiguration (DHCP Fix) ---
 cat <<EOF > /etc/dnsmasq.conf
 interface=wlan0
 bind-dynamic
@@ -53,83 +51,95 @@ bogus-priv
 dhcp-range=192.168.50.10,192.168.50.50,12h
 EOF
 
-# --- 5. Das AutoHotspot Switch-Skript (NetworkManager Edition) ---
+# --- 3. The AutoHotspot Logic Script ---
 cat <<'EOF' > /usr/bin/autohotspot
 #!/bin/bash
 WLAN_IFACE="wlan0"
 ETH_IFACE="eth0"
 
-# Warte auf Initialisierung
-sleep 5
+# Initial delay for NetworkManager to try saved connections (e.g. lunipu24)
+sleep 12
 
-echo "Prüfe Netzwerkstatus..."
+stop_hotspot() {
+    echo "Network found! Stopping Hotspot and returning to NetworkManager..."
+    systemctl stop hostapd dnsmasq
+    nmcli dev set $WLAN_IFACE managed yes
+    nmcli device connect $WLAN_IFACE || true
+}
+
+echo "Checking network status..."
 
 # A. CHECK ETHERNET
 if [ -d /sys/class/net/$ETH_IFACE ] && [ "$(cat /sys/class/net/$ETH_IFACE/carrier 2>/dev/null)" = "1" ]; then
-    echo "Ethernet aktiv. Beende."
+    echo "Ethernet is active. Exiting."
     exit 0
 fi
 
-# B. CHECK WLAN CLIENT (NetworkManager Check)
+# B. CHECK WLAN CLIENT (NM needs to be managed for this)
+nmcli dev set $WLAN_IFACE managed yes
+rfkill unblock wifi
+sleep 6
+
 WLAN_STATE=$(nmcli -t -f DEVICE,STATE dev | grep "^$WLAN_IFACE:connected" || true)
 if [ -n "$WLAN_STATE" ]; then
-    echo "WLAN bereits verbunden. Beende."
+    echo "WLAN already connected via NetworkManager. Exiting."
     exit 0
 fi
 
 # C. START HOTSPOT
-echo "Kein Netzwerk gefunden. Starte Hotspot..."
-
-# NM für wlan0 deaktivieren & RF-Kill lösen
+echo "No network found. Starting Hotspot..."
 nmcli dev set $WLAN_IFACE managed no
-rfkill unblock wifi
+sleep 2
 
-# Dienste vorbereiten (Unmask falls im Build-Prozess maskiert)
 systemctl unmask dnsmasq hostapd >/dev/null 2>&1
 systemctl stop dnsmasq hostapd 2>/dev/null
 
-# Interface IP setzen (Zwingend für DHCP/dnsmasq)
 ip link set $WLAN_IFACE down
 ip addr flush dev $WLAN_IFACE
 ip addr add 192.168.50.1/24 brd + dev $WLAN_IFACE
 ip link set $WLAN_IFACE up
 sleep 2
 
-# DHCP Server starten
 rm -f /var/lib/misc/dnsmasq.leases
 systemctl restart dnsmasq
+systemctl restart hostapd || /usr/sbin/hostapd -B /etc/hostapd/hostapd.conf
 
-# WLAN Hotspot starten
-if ! systemctl restart hostapd; then
-    # Fallback falls systemd klemmt
-    /usr/sbin/hostapd -B /etc/hostapd/hostapd.conf
-fi
+echo "Hotspot active on 192.168.50.1"
 
-echo "Hotspot aktiv auf 192.168.50.1"
+# --- MONITORING LOOP (Background) ---
+(
+    while true; do
+        sleep 15
+        ETH_CARRIER=$(cat /sys/class/net/$ETH_IFACE/carrier 2>/dev/null || echo "0")
+        if [ "$ETH_CARRIER" = "1" ]; then
+            stop_hotspot
+            break
+        fi
+    done
+) &
 EOF
 
 chmod +x /usr/bin/autohotspot
 
-# --- 6. Systemd Service Integration ---
+# --- 4. Systemd Service Integration ---
 cat <<EOF > /etc/systemd/system/autohotspot.service
 [Unit]
 Description=AutoHotspot Check for RatOS
-# Wichtig: Nach NetworkManager starten, damit nmcli funktioniert
-After=NetworkManager.service NetworkManager-wait-online.service
+After=NetworkManager.service NetworkManager-wait-online.service systemd-resolved.service
 Wants=NetworkManager.service
 
 [Service]
-Type=oneshot
+Type=forking
 ExecStart=/usr/bin/autohotspot
 RemainAfterExit=yes
+Restart=no
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Dienste für den ersten Start vorbereiten
-# Wir maskieren sie hier, damit nur das Skript sie starten darf
+# Mask services so they don't start automatically without the script
 systemctl mask hostapd dnsmasq
 systemctl enable autohotspot.service
 
-echo "Module 84-autohotspot integrated successfully."
+echo "Module 84-autohotspot integrated successfully for Armbian/PiOS Bookworm."
