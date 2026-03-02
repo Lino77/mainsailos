@@ -21,7 +21,7 @@ SWAP_CONF_FILE="/etc/dphys-swapfile"
 SWAP_SIZE="256"
 SWAP_MAX="1024"
 
-DEPS=(i2c-tools)
+DEPS=(i2c-tools cpufrequtils)
 
 apt-get install --yes "${DEPS[@]}"
 
@@ -31,6 +31,13 @@ apt-get install --yes "${DEPS[@]}"
 ########################################
 
 cat /files/boot-config.txt >> "$BOOT_PATH"/config.txt
+cp /files/dt-blob.bin "$BOOT_PATH"/
+touch "${BOOT_PATH}/ssh"
+
+USERPI_DATA='pi:$6$c70VpvPsVNCG0YR5$l5vWWLsLko9Kj65gcQ8qvMkuOoRkEagI90qi3F/Y7rm8eNYZHW8CY6BOIKwMH7a3YYzZYL90zf304cAHLFaZE0'
+
+# Datei schreiben
+echo "$USERPI_DATA" > "$BOOT_PATH/userconf.txt"
 
 ########################################
 # Disable serial console to enable     #
@@ -74,4 +81,44 @@ if [[ -f "${PICONFIG_SWAP_CONF_FILE}" ]]; then
     echo_green "Increasing swap file size to ${SWAP_SIZE} Mb. Limit to ${SWAP_MAX} Mb"
     sed -i 's/^CONF_SWAPSIZE.*/'CONF_SWAPSIZE="${SWAP_SIZE}"'/' "${SWAP_CONF_FILE}"
     sed -i 's/^#CONF_MAXSWAP.*/'CONF_MAXSWAP="${SWAP_MAX}"'/' "${SWAP_CONF_FILE}"
+fi
+
+########################################
+# CPU Performance Mode for RatOS       #
+########################################
+CPU_CONF="/etc/default/cpufrequtils"
+if [[ -f "${CPU_CONF}" ]]; then
+    sed -i 's/ENABLE=false/ENABLE=true/' "${CPU_CONF}"
+    sed -i 's/GOVERNOR=.*/GOVERNOR=performance/' "${CPU_CONF}"
+    systemctl_if_exists restart cpufrequtils
+else
+    # Falls cpufrequtils nicht da ist, versuchen wir es direkt via sysfs (Fallback)
+    echo "performance" | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor || true
+fi
+
+########################################
+# Finalize user setup and set password #
+########################################
+
+if [ -f /usr/lib/userconf-pi/userconf ]; then
+    hash="$(echo "$BASE_PASSWORD" | openssl passwd -6 -stdin)"
+    /usr/lib/userconf-pi/userconf "$BASE_USER" "${hash}"
+fi
+
+systemctl_if_exists disable userconfig.service
+
+########################################
+# Enable getty                         #
+########################################
+
+systemctl_if_exists enable getty@tty1.service
+
+########################################
+# Enable sshd                          #
+########################################
+
+if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
+    /usr/lib/raspberrypi-sys-mods/imager_custom enable_ssh
+else
+    systemctl_if_exists enable ssh
 fi

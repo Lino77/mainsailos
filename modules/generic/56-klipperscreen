@@ -17,36 +17,37 @@ source /files/00-config
 # Configuration                        #
 ########################################
 
-REPO="https://github.com/mryel00/crowsnest-dev.git"
-BRANCH="pynest"
-DEPS=(git make)
+REPO="https://github.com/KlipperScreen/KlipperScreen.git"
+SRC_DIR="/home/${BASE_USER}/KlipperScreen"
+KS_BUILD_INSTALL_SH="/home/${BASE_USER}/KlipperScreen/scripts/KlipperScreen-install.sh"
+
+BACKEND="X"
+SERVICE="Y"
+START=0
+NETWORK="Y"
 
 ########################################
-# Install System Packages              #
+# Switch to BASE_USER home directory   #
 ########################################
 
-apt-get install --yes "${DEPS[@]}"
+pushd /home/"${BASE_USER}" &> /dev/null || exit 1
 
 ########################################
-# Clone Repository                     #
+# Clone repository                     #
 ########################################
 
-pushd "/home/${BASE_USER}" &> /dev/null || exit 1
-sudo -u "${BASE_USER}" git clone ${REPO} crowsnest -b ${BRANCH}
+sudo -u "${BASE_USER}" git clone ${REPO} "${SRC_DIR}"
+
+########################################
+# Run KlipperScreen install routine    #
+########################################
+
+sudo -u "${BASE_USER}" env \
+    BACKEND="$BACKEND" SERVICE="$SERVICE" START="$START" NETWORK="$NETWORK" \
+    "${KS_BUILD_INSTALL_SH}"
+
+########################################
+# Return to last directory             #
+########################################
+
 popd &> /dev/null || exit 1
-
-########################################
-# Installation Crowsnest               #
-########################################
-
-pushd "/home/${BASE_USER}/crowsnest" &> /dev/null || exit 1
-export CROWSNEST_UNATTENDED=1
-export CROWSNEST_ADD_CROWSNEST_MOONRAKER=1
-make install
-popd &> /dev/null || exit 1
-
-########################################
-# Enable Service                       #
-########################################
-
-systemctl_if_exists enable crowsnest.service

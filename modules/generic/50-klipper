@@ -20,7 +20,8 @@ source /files/00-config
 SRC_DIR="/home/${BASE_USER}/klipper"
 ENV_DIR="/home/${BASE_USER}/klippy-env"
 
-REPO="https://github.com/Klipper3d/klipper.git"
+REPO="https://github.com/Rat-OS/klipper.git"
+BRANCH="ratos/v2.1.x"
 
 DEPS=(git \
       # Packages for python cffi
@@ -35,8 +36,13 @@ DEPS=(git \
       stm32flash dfu-util libnewlib-arm-none-eabi \
       gcc-arm-none-eabi binutils-arm-none-eabi libusb-1.0-0 \
       # Input shaper dependencies
-      python3-numpy python3-matplotlib libatlas-base-dev libopenblas-dev \
+      python3-numpy python3-matplotlib libopenblas-dev \
       )
+
+# libatlas-base-dev was merged into libopenblas-dev in Trixie and is no longer available
+if [ "$(is_in_apt libatlas-base-dev)" -eq 1 ]; then
+  DEPS+=(libatlas-base-dev)
+fi
 
 ########################################
 # Install Dependencies                 #
@@ -63,7 +69,18 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 ########################################
 
 echo "Cloning repo ..."
-sudo -u "${BASE_USER}" git clone ${REPO} klipper
+sudo -u "${BASE_USER}" git clone -b ${BRANCH} ${REPO} klipper
+pushd "klipper" &> /dev/null || exit 1
+sudo -u "${BASE_USER}" git remote rename origin ratos-fork
+sudo -u "${BASE_USER}" git remote add origin https://github.com/Klipper3d/klipper.git
+sudo -u "${BASE_USER}" git fetch origin
+sudo -u "${BASE_USER}" git branch --set-upstream-to=ratos-fork/ratos/v2.1.x ratos/v2.1.x
+popd &> /dev/null || exit 1
+
+#echo "reset git"
+#pushd "klipper" &> /dev/null || exit 1
+#sudo -u "${BASE_USER}" git reset --hard b7233d1197d9a2158676ad39d02b80f787054e20
+#popd &> /dev/null || exit 1
 
 ########################################
 # Create printer_data directories      #
@@ -81,7 +98,10 @@ sudo -u "${BASE_USER}" virtualenv -p python3 "${ENV_DIR}"
 echo "Installing Python Dependencies ..."
 sudo -u "${BASE_USER}" "${ENV_DIR}"/bin/pip install -r "${SRC_DIR}"/scripts/klippy-requirements.txt
 echo "Installing NumPy in Virtualenv"
-sudo -u "${BASE_USER}" "${ENV_DIR}"/bin/pip install "numpy<1.26"
+
+# Normally klipper would use "numpy<1.26", but that version does not support
+# Python 3.13 which is now in Debian Trixie.
+sudo -u "${BASE_USER}" "${ENV_DIR}"/bin/pip install "numpy"
 
 ########################################
 # Return to saved directory            #
