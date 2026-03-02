@@ -21,7 +21,8 @@ SWAP_CONF_FILE="/etc/dphys-swapfile"
 SWAP_SIZE="256"
 SWAP_MAX="1024"
 
-DEPS=(i2c-tools)
+
+DEPS=(i2c-tools cpufrequtils)
 
 apt-get install --yes "${DEPS[@]}"
 
@@ -81,4 +82,20 @@ if [[ -f "${PICONFIG_SWAP_CONF_FILE}" ]]; then
     echo_green "Increasing swap file size to ${SWAP_SIZE} Mb. Limit to ${SWAP_MAX} Mb"
     sed -i 's/^CONF_SWAPSIZE.*/'CONF_SWAPSIZE="${SWAP_SIZE}"'/' "${SWAP_CONF_FILE}"
     sed -i 's/^#CONF_MAXSWAP.*/'CONF_MAXSWAP="${SWAP_MAX}"'/' "${SWAP_CONF_FILE}"
+fi
+
+########################################
+# CPU Performance Mode for RatOS       #
+########################################
+CPU_CONF="/etc/default/cpufrequtils"
+if [[ -f "${CPU_CONF}" ]]; then
+    # Aktiviert den Dienst und setzt Governor auf performance
+    sed -i 's/ENABLE=.*/ENABLE=true/' "${CPU_CONF}"
+    sed -i 's/GOVERNOR=.*/GOVERNOR=performance/' "${CPU_CONF}"
+    systemctl restart cpufrequtils || true
+fi
+
+# Fallback/Zusatz: Sofortige Aktivierung für alle Kerne (sysfs)
+if [ -d /sys/devices/system/cpu/cpufreq ]; then
+    echo "performance" | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor || true
 fi
