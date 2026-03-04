@@ -34,9 +34,9 @@ apt-get install --yes "${DEPS[@]}"
 cat /files/boot-config.txt >> "$BOOT_PATH"/config.txt
 cp /files/dt-blob.bin "$BOOT_PATH"/
 
-#touch "${BOOT_PATH}/ssh"
-#USERPI_DATA='pi:$6$c70VpvPsVNCG0YR5$l5vWWLsLko9Kj65gcQ8qvMkuOoRkEagI90qi3F/Y7rm8eNYZHW8CY6BOIKwMH7a3YYzZYL90zf304cAHLFaZE0'
-#echo "$USERPI_DATA" > "$BOOT_PATH/userconf.txt"
+touch "${BOOT_PATH}/ssh"
+USERPI_DATA='pi:$6$c70VpvPsVNCG0YR5$l5vWWLsLko9Kj65gcQ8qvMkuOoRkEagI90qi3F/Y7rm8eNYZHW8CY6BOIKwMH7a3YYzZYL90zf304cAHLFaZE0'
+echo "$USERPI_DATA" > "$BOOT_PATH/userconf.txt"
 
 ########################################
 # Disable serial console to enable     #
@@ -86,13 +86,16 @@ fi
 # CPU Performance Mode for RatOS       #
 ########################################
 CPU_CONF="/etc/default/cpufrequtils"
-if [[ -f "${CPU_CONF}" ]]; then
-    # Aktiviert den Dienst und setzt Governor auf performance
-    sed -i 's/ENABLE=.*/ENABLE=true/' "${CPU_CONF}"
-    sed -i 's/GOVERNOR=.*/GOVERNOR=performance/' "${CPU_CONF}"
+
+# Falls die Datei nicht existiert, erstellen wir sie
+if [ ! -f "$CPU_CONF" ]; then
+    touch "$CPU_CONF"
 fi
 
-# Fallback/Zusatz: Sofortige Aktivierung für alle Kerne (sysfs)
-if [ -d /sys/devices/system/cpu/cpufreq ]; then
-    echo "performance" | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor || true
-fi
+# Sicherstellen, dass die Werte gesetzt sind (unabhängig davon, ob sie vorher da waren)
+echo 'ENABLE="true"' > "$CPU_CONF"
+echo 'GOVERNOR="performance"' >> "$CPU_CONF"
+
+# Den Dienst für den nächsten Boot aktivieren
+systemctl_if_exists enable cpufrequtils
+
