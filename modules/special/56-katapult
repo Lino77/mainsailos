@@ -17,8 +17,8 @@ source /files/00-config
 # Configuration                        #
 ########################################
 
-REPO="https://github.com/dw-0/kiauh"
-DEPS="git"
+REPO="https://github.com/Arksine/katapult"
+DEPS="git python3-serial"
 
 ########################################
 # Install dependencies                 #
@@ -37,15 +37,15 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 ########################################
 
 echo "Cloning Repository"
-sudo -u "${BASE_USER}" git clone ${REPO} kiauh
+sudo -u "${BASE_USER}" git clone ${REPO} katapult
 
 ########################################
-# Install HelixScreen extension        #
+# Add config to moonraker.conf         #
 ########################################
 
-sudo -u "${BASE_USER}"git clone --depth 1 https://github.com/prestonbrown/helixscreen.git helixscreen
-cp -r /helixscreen/scripts/kiauh/helixscreen ~/kiauh/kiauh/extensions/
-rm -rf helixscreen
+if [[ -f $MOONRAKER_CONFIG ]]; then
+    cat /files/moonraker_katapult.conf >> "$MOONRAKER_CONFIG"
+fi
 
 ########################################
 # Return to saved directory            #
