@@ -40,6 +40,16 @@ echo "Cloning Repository"
 sudo -u "${BASE_USER}" git clone ${REPO} kiauh
 
 ########################################
+# Install HelixScreen extension        #
+########################################
+
+sudo -u "${BASE_USER}" git clone --depth 1 https://github.com/prestonbrown/helixscreen.git helixscreen
+cp -r ./helixscreen/scripts/kiauh/helixscreen ./kiauh/kiauh/extensions/
+chown -R "${BASE_USER}:${BASE_USER}" ./kiauh/kiauh/extensions/helixscreen
+
+rm -rf helixscreen
+
+########################################
 # Return to saved directory            #
 ########################################
 
