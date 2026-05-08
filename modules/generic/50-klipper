@@ -20,7 +20,7 @@ source /files/00-config
 SRC_DIR="/home/${BASE_USER}/klipper"
 ENV_DIR="/home/${BASE_USER}/klippy-env"
 
-REPO="https://github.com/Rat-OS/klipper.git"
+REPO="https://github.com/Lino77/klipper_S1.git"
 BRANCH="ratos/v2.1.x"
 
 DEPS=(git \
@@ -72,7 +72,7 @@ echo "Cloning repo ..."
 sudo -u "${BASE_USER}" git clone -b ${BRANCH} ${REPO} klipper
 pushd "klipper" &> /dev/null || exit 1
 sudo -u "${BASE_USER}" git remote rename origin ratos-fork
-sudo -u "${BASE_USER}" git remote add origin https://github.com/Lino77/klipper_S1.git
+sudo -u "${BASE_USER}" git remote add origin https://github.com/Klipper3d/klipper.git
 sudo -u "${BASE_USER}" git fetch origin
 sudo -u "${BASE_USER}" git branch --set-upstream-to=ratos-fork/ratos/v2.1.x ratos/v2.1.x
 popd &> /dev/null || exit 1
