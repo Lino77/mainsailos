@@ -12,6 +12,10 @@ on:
       - "config.yml"
   workflow_dispatch:
 
+# Erzwingt Node.js 24 für alle Actions in diesem Workflow
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 concurrency:
   group: ci-build-${{ github.ref }}-1
   cancel-in-progress: true
@@ -26,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "🧰 Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5 # Aktualisiert von v4 auf v5
         with:
           python-version: '3.x'
 
@@ -162,9 +166,7 @@ jobs:
       - name: "🛠 Compressing Image"
         working-directory: ./build
         run: |
-          CPU_COUNT="$(nproc)"
-          echo -e "\e[32mUsing ${CPU_COUNT} Cores for compression...\e[0m"
-          xz -efkvz9T"${CPU_COUNT}" ${{ env.IMAGE }} || true
+          xz -efkvz9T"$(nproc)" ${{ env.IMAGE }} || true
 
       - name: "🔐 Create hash"
         working-directory: ./build
@@ -181,4 +183,3 @@ jobs:
             build/${{ env.IMAGE }}.xz.sha256
             build/${{ env.IMAGE }}.sha256
           if-no-files-found: ignore
-
