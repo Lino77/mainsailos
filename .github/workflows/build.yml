@@ -27,10 +27,10 @@ jobs:
       matrix: ${{ steps.create-matrix.outputs.matrix }}
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "🧰 Setup Python"
-        uses: actions/setup-python@v5 # Aktualisiert von v4 auf v5
+        uses: actions/setup-python@v6 # Aktualisiert von v4 auf v6
         with:
           python-version: '3.x'
 
@@ -50,13 +50,13 @@ jobs:
 
   build:
     needs: generate-matrix
-    runs-on: ubuntu-22.04-arm
+    runs-on: ubuntu-24.04-arm
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "#️⃣️ Set RELEASE_TAG from VERSION file"
         run: |
@@ -175,7 +175,7 @@ jobs:
           sha256sum ${{ env.IMAGE }}.xz > ${{ env.IMAGE }}.xz.sha256
 
       - name: "📋 Upload Artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.IMAGE }}-artifacts
           path: |
