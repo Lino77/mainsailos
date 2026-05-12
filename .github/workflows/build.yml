@@ -12,6 +12,10 @@ on:
       - "config.yml"
   workflow_dispatch:
 
+# Erzwingt Node.js 24 für alle Actions in diesem Workflow
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 concurrency:
   group: ci-build-${{ github.ref }}-1
   cancel-in-progress: true
@@ -24,6 +28,14 @@ jobs:
     steps:
       - name: "📥 Checkout"
         uses: actions/checkout@v6
+
+      - name: "🧰 Setup Python"
+        uses: actions/setup-python@v6 # Aktualisiert von v4 auf v6
+        with:
+          python-version: '3.x'
+
+      - name: "📦 Install Python deps"
+        run: python -m pip install pyyaml
 
       - name: "🛠 Generate matrix from config.yml"
         id: create-matrix
@@ -142,12 +154,11 @@ jobs:
           scripts:  "${{ github.workspace }}/scripts"
           config: "${{ github.workspace }}/config.local"
           environment: '{ "RELEASE_TAG": "${{ env.RELEASE_TAG }}"}'
-          custopizer: "main"
 
       - name: "✏ Rename image"
         working-directory: ./build
         run: |
-          IMAGE="${{ env.DATE }}-MainsailOS-${{ matrix.name }}-${{ env.RELEASE_TAG }}.img"
+          IMAGE="${{ env.DATE }}-RatOS-${{ matrix.name }}-${{ env.RELEASE_TAG }}.img"
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
           mv output.img "${IMAGE}"
@@ -155,9 +166,7 @@ jobs:
       - name: "🛠 Compressing Image"
         working-directory: ./build
         run: |
-          CPU_COUNT="$(nproc)"
-          echo -e "\e[32mUsing ${CPU_COUNT} Cores for compression...\e[0m"
-          xz -efkvz9T"${CPU_COUNT}" ${{ env.IMAGE }} || true
+          xz -efkvz9T"$(nproc)" ${{ env.IMAGE }} || true
 
       - name: "🔐 Create hash"
         working-directory: ./build
@@ -166,7 +175,7 @@ jobs:
           sha256sum ${{ env.IMAGE }}.xz > ${{ env.IMAGE }}.xz.sha256
 
       - name: "📋 Upload Artifacts"
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.IMAGE }}-artifacts
           path: |
@@ -174,4 +183,3 @@ jobs:
             build/${{ env.IMAGE }}.xz.sha256
             build/${{ env.IMAGE }}.sha256
           if-no-files-found: ignore
-
