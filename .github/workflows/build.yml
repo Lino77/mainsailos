@@ -154,6 +154,7 @@ jobs:
           scripts:  "${{ github.workspace }}/scripts"
           config: "${{ github.workspace }}/config.local"
           environment: '{ "RELEASE_TAG": "${{ env.RELEASE_TAG }}"}'
+          custopizer: "main"
 
       - name: "✏ Rename image"
         working-directory: ./build
