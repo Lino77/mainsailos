@@ -59,6 +59,12 @@ sed -i 's/^X11Forwarding/#X11Forwarding/' /etc/ssh/sshd_config
 sed -i 's/^#MaxAuthTries 6/MaxAuthTries 3/' /etc/ssh/sshd_config
 
 ########################################
+# patch cpufrequtils config            #
+########################################
+
+sed -i 's/^GOVERNOR=.*/GOVERNOR=performance/' /etc/default/cpufrequtils
+
+########################################
 # remove .not_logged_in_yet to disable #
 # first boot routine                   #
 ########################################
