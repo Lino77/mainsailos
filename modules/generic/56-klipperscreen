@@ -21,7 +21,7 @@ REPO="https://github.com/KlipperScreen/KlipperScreen.git"
 SRC_DIR="/home/${BASE_USER}/KlipperScreen"
 KS_BUILD_INSTALL_SH="/home/${BASE_USER}/KlipperScreen/scripts/KlipperScreen-install.sh"
 
-BACKEND="X"
+BACKEND="w"
 SERVICE="Y"
 START=0
 NETWORK="Y"
