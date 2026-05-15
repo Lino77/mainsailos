@@ -20,8 +20,13 @@ source /files/00-config
 SRC_DIR="/home/${BASE_USER}/klipper"
 ENV_DIR="/home/${BASE_USER}/klippy-env"
 
-REPO="https://github.com/Lino77/klipper_S1.git"
-BRANCH="ratos/v2.1.x"
+# Offizielles Upstream-Repository für Moonraker-Kompatibilität
+OFFICIAL_REPO="https://github.com/Klipper3d/klipper.git"
+OFFICIAL_BRANCH="master"
+
+# RatOS-Spezifischer Fork für die Code-Basis
+RATOS_FORK_REPO="https://github.com/Lino77/klipper.git"
+RATOS_FORK_BRANCH="ratos/v3.0.x"
 
 DEPS=(git \
       # Packages for python cffi
@@ -68,19 +73,22 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 # Clone repository                     #
 ########################################
 
-echo "Cloning repo ..."
-sudo -u "${BASE_USER}" git clone -b ${BRANCH} ${REPO} klipper
+echo "Cloning official repo as origin ..."
+# Klonen des offiziellen Repositories sorgt für korrekte Moonraker-Erkennung
+sudo -u "${BASE_USER}" git clone -b ${OFFICIAL_BRANCH} ${OFFICIAL_REPO} klipper
 pushd "klipper" &> /dev/null || exit 1
-sudo -u "${BASE_USER}" git remote rename origin ratos-fork
-sudo -u "${BASE_USER}" git remote add origin https://github.com/Klipper3d/klipper.git
-sudo -u "${BASE_USER}" git fetch origin
-sudo -u "${BASE_USER}" git branch --set-upstream-to=ratos-fork/ratos/v2.1.x ratos/v2.1.x
-popd &> /dev/null || exit 1
 
-#echo "reset git"
-#pushd "klipper" &> /dev/null || exit 1
-#sudo -u "${BASE_USER}" git reset --hard b7233d1197d9a2158676ad39d02b80f787054e20
-#popd &> /dev/null || exit 1
+echo "Adding RatOS fork as secondary remote ..."
+# Fork hinzufügen und Code holen
+sudo -u "${BASE_USER}" git remote add ratos-fork ${RATOS_FORK_REPO}
+sudo -u "${BASE_USER}" git fetch ratos-fork
+
+echo "Checking out Fork-Code onto local master branch ..."
+# Erstellt lokalen master basierend auf dem Fork, behält aber die Brücke zu origin/master bei
+sudo -u "${BASE_USER}" git checkout -B ${OFFICIAL_BRANCH} ratos-fork/${RATOS_FORK_BRANCH}
+sudo -u "${BASE_USER}" git branch --set-upstream-to=origin/${OFFICIAL_BRANCH} ${OFFICIAL_BRANCH}
+
+popd &> /dev/null || exit 1
 
 ########################################
 # Create printer_data directories      #
