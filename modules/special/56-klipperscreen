@@ -45,7 +45,13 @@ sudo -u "${BASE_USER}" git clone ${REPO} "${SRC_DIR}"
 sudo -u "${BASE_USER}" env \
     BACKEND="$BACKEND" SERVICE="$SERVICE" START="$START" NETWORK="$NETWORK" \
     "${KS_BUILD_INSTALL_SH}"
+#######################################
+# Add config to moonraker.conf         #
+########################################
 
+if [[ -f $MOONRAKER_CONFIG ]]; then
+    cat /files/moonraker_klipperscreen.conf >> "$MOONRAKER_CONFIG"
+fi
 ########################################
 # Return to last directory             #
 ########################################
