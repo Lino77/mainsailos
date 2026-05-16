@@ -1,6 +1,8 @@
 #!/bin/bash
 set -xe
 export LC_ALL=C
+export DEBIAN_FRONTEND=noninteractive
+export INIT_SYSTEM="systemd"
 
 ########################################
 # Functions and Basic Configuration    #
@@ -42,7 +44,7 @@ sudo -u "${BASE_USER}" git clone ${REPO} "${SRC_DIR}"
 # Führt das offizielle Installationsskript aus dem scripts-Ordner aus
 sudo -u "${BASE_USER}" "${HELIX_BUILD_INSTALL_SH}"
 
-/etc/init.d/S90helixscreen stop || true
+systemctl stop helixscreen || true
 
 ########################################
 # Return to last directory             #
