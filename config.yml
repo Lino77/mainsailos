@@ -8,7 +8,9 @@
     MOUNT_PROC: 1
     MOUNT_SYS: 1
     INIT_FORMAT: cloudinit-rpi
-  special_modules: []
+  special_modules:
+    - 50-kiauh
+    - 60-helixscreen
   rpi_json:
     name: "MainsailOS $VERSION$ - Raspberry Pi (64-bit)"
     description: "A port of Raspberry Pi OS with preinstalled Klipper/Moonraker/Mainsail for 3D printers"
