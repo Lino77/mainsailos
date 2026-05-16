@@ -18,7 +18,7 @@ source /files/00-config
 ########################################
 
 # HelixScreen nutzt das offizielle Repository von Preston Brown
-REPO="https://github.com"
+REPO="https://github.com/prestonbrown/helixscreen.git"
 SRC_DIR="/home/${BASE_USER}/helixscreen"
 HELIX_BUILD_INSTALL_SH="/home/${BASE_USER}/helixscreen/scripts/install.sh"
 
