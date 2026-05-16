@@ -1,8 +1,6 @@
 #!/bin/bash
 set -xe
 export LC_ALL=C
-export DEBIAN_FRONTEND=noninteractive
-export INIT_SYSTEM="systemd"
 
 ########################################
 # Functions and Basic Configuration    #
@@ -35,7 +33,7 @@ pushd /home/"${BASE_USER}" &> /dev/null || exit 1
 ########################################
 
 # Klonen des HelixScreen Repositories als BASE_USER
-sudo -E -u "${BASE_USER}" git clone ${REPO} "${SRC_DIR}"
+sudo -u "${BASE_USER}" git clone ${REPO} "${SRC_DIR}"
 
 ########################################
 # Run HelixScreen install routine      #
@@ -48,6 +46,10 @@ mkdir -p /run/systemd/system
 sudo -E -u "${BASE_USER}" "${HELIX_BUILD_INSTALL_SH}"
 
 systemctl stop helixscreen || true
+
+# Aufräumen: Den temporären systemd-Ordner für den Build wieder löschen
+rm -rf /run/run/systemd/system 2>/dev/null || true
+rm -rf /run/systemd/system 2>/dev/null || true
 
 ########################################
 # Return to last directory             #
