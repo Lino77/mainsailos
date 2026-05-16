@@ -35,14 +35,17 @@ pushd /home/"${BASE_USER}" &> /dev/null || exit 1
 ########################################
 
 # Klonen des HelixScreen Repositories als BASE_USER
-sudo -u "${BASE_USER}" git clone ${REPO} "${SRC_DIR}"
+sudo -E -u "${BASE_USER}" git clone ${REPO} "${SRC_DIR}"
 
 ########################################
 # Run HelixScreen install routine      #
 ########################################
 
+# Trick: Wir gaukeln dem Installer ein aktives systemd-Verzeichnis vor
+mkdir -p /run/systemd/system
+
 # Führt das offizielle Installationsskript aus dem scripts-Ordner aus
-sudo -u "${BASE_USER}" "${HELIX_BUILD_INSTALL_SH}"
+sudo -E -u "${BASE_USER}" "${HELIX_BUILD_INSTALL_SH}"
 
 systemctl stop helixscreen || true
 
