@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: "🧰 Setup Python"
-        uses: actions/setup-python@v6 # Aktualisiert von v4 auf v6
+        uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 
@@ -175,6 +175,60 @@ jobs:
           sha256sum ${{ env.IMAGE }} > ${{ env.IMAGE }}.sha256
           sha256sum ${{ env.IMAGE }}.xz > ${{ env.IMAGE }}.xz.sha256
 
+      - name: "📊 Get filesizes and hashes"
+        id: filesizes
+        if: ${{ matrix.rpi_json != null }}
+        working-directory: ./build
+        run: |
+          echo "image=$(stat -c%s "${{ env.IMAGE }}")" >> $GITHUB_OUTPUT
+          echo "zip=$(stat -c%s "${{ env.IMAGE }}.xz")" >> $GITHUB_OUTPUT
+          echo "hash=$(cat "${{ env.IMAGE }}.sha256" | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      - name: "🔧 Generate RPI JSON file"
+        if: ${{ matrix.rpi_json != null }}
+        shell: python
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          INIT_FORMAT: ${{ matrix.env.INIT_FORMAT }}
+          IMAGE_NAME: ${{ env.IMAGE }}
+          REPO: ${{ github.repository }}
+          DATE: ${{ env.DATE }}
+          EXTRACT_SIZE: ${{ steps.filesizes.outputs.image }}
+          DOWNLOAD_SIZE: ${{ steps.filesizes.outputs.zip }}
+          EXTRACT_SHA256: ${{ steps.filesizes.outputs.hash }}
+        run: |
+          import json
+          import os
+
+          matrix = json.loads(os.environ['MATRIX_CONTEXT'])
+          rpi_data = matrix['rpi_json'].copy()
+
+          if 'name' not in rpi_data:
+              rpi_data['name'] = "MainsailOS $VERSION$"
+          rpi_data['name'] = rpi_data['name'].replace('$VERSION$', os.environ['RELEASE_TAG'])
+
+          env_init_format = os.environ.get('INIT_FORMAT', '')
+          if env_init_format and 'init_format' not in rpi_data:
+              rpi_data['init_format'] = env_init_format
+
+          filename = f"{os.environ['IMAGE_NAME']}.xz"
+          repo = os.environ['REPO']
+          release_tag = os.environ['RELEASE_TAG']
+          
+          # "/" nach github.com ergänzt für valide URLs
+          rpi_data['url'] = f"https://github.com{repo}/releases/download/{release_tag}/{filename}"
+          rpi_data['release_date'] = os.environ['DATE']
+          rpi_data['extract_size'] = int(os.environ['EXTRACT_SIZE'])
+          rpi_data['image_download_size'] = int(os.environ['DOWNLOAD_SIZE'])
+          rpi_data['extract_sha256'] = os.environ['EXTRACT_SHA256']
+
+          os.makedirs('build', exist_ok=True)
+          json_path = f"build/{os.environ['IMAGE_NAME']}.json"
+          with open(json_path, 'w') as f:
+              json.dump(rpi_data, f, indent=2)
+              print(f"Generated JSON file for {json_path}")
+
       - name: "📋 Upload Artifacts"
         uses: actions/upload-artifact@v6
         with:
@@ -183,4 +237,5 @@ jobs:
             build/${{ env.IMAGE }}.xz
             build/${{ env.IMAGE }}.xz.sha256
             build/${{ env.IMAGE }}.sha256
+            build/${{ env.IMAGE }}.json
           if-no-files-found: ignore
