@@ -128,6 +128,9 @@
     MOUNT_PROC: 1
     MOUNT_SYS: 1
     INIT_FORMAT: cloudinit
+  special_modules:
+    - 50-kiauh
+    - 60-helixscreen
   rpi_json:
     name: "MainsailOS $VERSION$ - BigTreeTech CB1 (64-bit)"
     description: "A port of Armbian with preinstalled Klipper/Moonraker/Mainsail for 3D printers"

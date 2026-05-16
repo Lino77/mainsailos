@@ -1,0 +1,49 @@
+#!/bin/bash
+set -xe
+export LC_ALL=C
+
+########################################
+# Functions and Basic Configuration    #
+########################################
+
+# Load common functions and set up cleanup trap
+source /common.sh
+install_cleanup_trap
+
+# Load additional configuration (e.g., BASE_USER)
+source /files/00-config
+
+########################################
+# Configuration                        #
+########################################
+
+# HelixScreen nutzt das offizielle Repository von Preston Brown
+REPO="https://github.com"
+SRC_DIR="/home/${BASE_USER}/helixscreen"
+HELIX_BUILD_INSTALL_SH="/home/${BASE_USER}/helixscreen/scripts/install.sh"
+
+########################################
+# Switch to BASE_USER home directory   #
+########################################
+
+pushd /home/"${BASE_USER}" &> /dev/null || exit 1
+
+########################################
+# Clone repository                     #
+########################################
+
+# Klonen des HelixScreen Repositories als BASE_USER
+sudo -u "${BASE_USER}" git clone ${REPO} "${SRC_DIR}"
+
+########################################
+# Run HelixScreen install routine      #
+########################################
+
+# Führt das offizielle Installationsskript aus dem scripts-Ordner aus
+sudo -u "${BASE_USER}" "${HELIX_BUILD_INSTALL_SH}"
+
+########################################
+# Return to last directory             #
+########################################
+
+popd &> /dev/null || exit 1
