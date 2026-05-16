@@ -59,10 +59,25 @@ sed -i 's/^X11Forwarding/#X11Forwarding/' /etc/ssh/sshd_config
 sed -i 's/^#MaxAuthTries 6/MaxAuthTries 3/' /etc/ssh/sshd_config
 
 ########################################
-# patch cpufrequtils config            #
+# CPU Performance Mode (Debian Trixie) #
 ########################################
 
-sed -i 's/^GOVERNOR=.*/GOVERNOR=performance/' /etc/default/cpufrequtils
+cat <<'EOF' > /etc/systemd/system/set-governor.service
+[Unit]
+Description=Set CPU Governor to Performance
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo "performance" | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+
+systemctl enable set-governor.service
 
 ########################################
 # remove .not_logged_in_yet to disable #
