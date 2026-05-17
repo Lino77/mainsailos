@@ -216,17 +216,22 @@ jobs:
           repo = os.environ['REPO']
           release_tag = os.environ['RELEASE_TAG']
           
-          
-          rpi_data['url'] = f"https://github.com/{repo}/releases/download/{release_tag}/{filename}"
+          rpi_data['url'] = f"file:///home/lino/rpi_test/{release_tag}/{filename}"
           rpi_data['release_date'] = os.environ['DATE']
           rpi_data['extract_size'] = int(os.environ['EXTRACT_SIZE'])
           rpi_data['image_download_size'] = int(os.environ['DOWNLOAD_SIZE'])
           rpi_data['extract_sha256'] = os.environ['EXTRACT_SHA256']
-
+          
+          final_output = {
+              "os_list": [
+                  rpi_data
+              ]
+          }
+          
           os.makedirs('build', exist_ok=True)
           json_path = f"build/{os.environ['IMAGE_NAME']}.json"
           with open(json_path, 'w') as f:
-              json.dump(rpi_data, f, indent=2)
+              json.dump(final_output, f, indent=2)
               print(f"Generated JSON file for {json_path}")
 
       - name: "📋 Upload Artifacts"
