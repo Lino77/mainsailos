@@ -1,7 +1,7 @@
 - name: armbian-btt_cb2-bookworm
   type: armbian
   img_download_url: "https://github.com/bigtreetech/CB2/releases/download/V3.0.2/CB2_Debian12_minimal_kernel6.1_20250821.img.xz"
-  img_hash_url: "https://raw.githubusercontent.com/Lino77/mainsailos/BTT_CB2/CB2_Debian12_minimal_kernel6.1_20250821.img.xz.sha256"
+  img_hash_url: "https://raw.githubusercontent.com/Lino77/mainsailos/refs/heads/BTT_CB2/CB2_Debian12_minimal_kernel6.1_20250821.img.xz.sha256"
   env:
     ARCH: arm64
     DISTRO: armbian
