@@ -20,8 +20,6 @@ source /files/00-config
 SRC_DIR="/home/${BASE_USER}/klipper"
 ENV_DIR="/home/${BASE_USER}/klippy-env"
 
-REPO="https://github.com/Klipper3d/klipper.git"
-
 DEPS=(git \
       # Packages for python cffi
       virtualenv python3-dev libffi-dev build-essential \
@@ -62,12 +60,17 @@ pushd "/home/${BASE_USER}" &> /dev/null || exit 1
 # Clone repository                     #
 ########################################
 
-echo "Cloning repo ..."
-sudo -u "${BASE_USER}" git clone ${REPO} klipper
+REPO="https://github.com/Rat-OS/klipper.git"
+BRANCH="ratos/v2.1.x"
 
-echo "reset git"
+echo "Cloning repo ..."
+sudo -u "${BASE_USER}" git clone -b ${BRANCH} ${REPO} klipper
 pushd "klipper" &> /dev/null || exit 1
-sudo -u "${BASE_USER}" git reset --hard b7233d1197d9a2158676ad39d02b80f787054e20
+#git reset --hard 2817b348e23c779b68ae5f27f2b9b9af8cfcf0da
+sudo -u "${BASE_USER}" git remote rename origin ratos-fork
+sudo -u "${BASE_USER}" git remote add origin https://github.com/Klipper3d/klipper.git
+sudo -u "${BASE_USER}" git fetch origin
+sudo -u "${BASE_USER}" git branch --set-upstream-to=ratos-fork/ratos/v2.1.x ratos/v2.1.x
 popd &> /dev/null || exit 1
 
 ########################################

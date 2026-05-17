@@ -57,10 +57,12 @@ apt-get install --yes ${RATOS_DEPS}
 ## END Step 3
 
 # Install RatOS Configurator
-sed -i 's/\$sudo rm "\$target"/$sudo rm -f "$target"/' /home/"${BASE_USER}"/ratos-configurator/app/scripts/common.sh
-sed -i '/^SCRIPT_DIR=/a CFG_DIR=$(realpath "$SCRIPT_DIR/..")\n' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
-sed -i 's|"\$SCRIPT_DIR"/templates/initial-printer.template.cfg|"\$CFG_DIR"/templates/initial-printer.template.cfg|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
-sed -i 's|"\$SCRIPT_DIR"/boards/\*/\*.rules|"\$CFG_DIR"/boards/\*/\*.rules|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+#sed -i 's/\$sudo rm "\$target"/$sudo rm -f "$target"/' /home/"${BASE_USER}"/ratos-configurator/app/scripts/common.sh
+#sed -i '/^SCRIPT_DIR=/a CFG_DIR=$(realpath "$SCRIPT_DIR/..")\n' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+#sed -i 's|"\$SCRIPT_DIR"/templates/initial-printer.template.cfg|"\$CFG_DIR"/templates/initial-printer.template.cfg|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+#sed -i 's|"\$SCRIPT_DIR"/boards/\*/\*.rules|"\$CFG_DIR"/boards/\*/\*.rules|' /home/"${BASE_USER}"/ratos-configurator/configuration/scripts/ratos-install.sh
+echo "Installing Pygam in Virtualenv"
+sudo -u "${BASE_USER}" /home/"${BASE_USER}"/klippy-env/bin/pip install -v pygam
 
 sudo -u "${BASE_USER}" bash /home/"${BASE_USER}"/ratos-configurator/app/scripts/setup.sh
 

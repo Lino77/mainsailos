@@ -19,14 +19,17 @@ pushd "/home/${BASE_USER}/klipper" &> /dev/null || exit 1
 
 echo "flashing rpi-mcu"
 cp -f /home/"${BASE_USER}"/printer_data/config/RatOS/boards/rpi/firmware.config /home/"${BASE_USER}"/klipper/.config
+
+chown -R pi:pi /home/pi/klipper
+git config --global --add safe.directory /home/pi/klipper
+
 make olddefconfig
 make clean
-# Reset ownership so make flash doesn't complain
-chown pi:pi -R /home/pi/klipper
 make flash
 popd
 
 pushd "/home/${BASE_USER}/klipper" &> /dev/null || exit 1
+sudo git config --global --add safe.directory /home/pi/klipper
 sudo cp "./scripts/klipper-mcu.service" /etc/systemd/system/klipper_mcu.service
 sudo systemctl enable klipper_mcu.service
 popd
